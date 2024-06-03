@@ -1,0 +1,12 @@
+{% extends 'index.html' %}
+
+{% block content %}
+<h2>Quotes tagged with "{{ tag.name }}"</h2>
+<ul>
+    {% for quote in quotes %}
+        <li>
+            {{ quote.text }} - <strong>{{ quote.author.name }}</strong>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
