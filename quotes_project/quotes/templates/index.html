@@ -9,40 +9,58 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="{% url 'home' %}">Quotes</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ml-auto">
-                {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'add_author' %}">Add Author</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'add_quote' %}">Add Quote</a>
-                    </li>
-                    <li class="nav-item">
-                        <form method="post" action="{% url 'logout' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-link nav-link" style="display: inline; padding: 0;">Logout</button>
-                        </form>
-                {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'register' %}">Register</a>
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
+        <div class="collapse navbar-collapse justify-content-between">
+    <ul class="navbar-nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'author_list' %}">All Authors</a>
+        </li>
+    </ul>
+    <ul class="navbar-nav">
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'add_author' %}">Add Author</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'add_quote' %}">Add Quote</a>
+        </li>
+            <li class="nav-item">
+                <form method="post" action="{% url 'scrape_quotes' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Scrape Quotes</button>
+                </form>
+            </li>
+            <li class="nav-item">
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link nav-link" style="display: inline; padding: 0;">Logout</button>
+                </form>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Register</a>
+            </li>
+        {% endif %}
+    </ul>
+</div>
     </nav>
     <div class="container mt-4">
-        {% if user.is_authenticated %}
-            <form method="post" action="{% url 'scrape_quotes' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Scrape Quotes</button>
-            </form>
-        {% endif %}
-        {% block content %}
-        {% endblock %}
+        <div class="row">
+            <div class="col-md-8">
+                {% block content %}
+                {% endblock %}
+            </div>
+            <div class="col-md-4">
+                <h4>Tags</h4>
+                <ul class="list-group">
+                    {% for tag in tags %}
+                        <li class="list-group-item"><a href="{% url 'quotes_by_tag' tag.name %}">{{ tag.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </div>
 </body>
 </html>
+

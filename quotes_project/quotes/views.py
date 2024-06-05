@@ -1,15 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from .forms import UserRegisterForm
 from .models import Author, Quote, Tag
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.core.paginator import Paginator
-from scrapers.spiders.authors_spider import AuthorsSpider
-from scrapers.spiders.quotes_spider import QuotesSpider
-from scrapy.crawler import CrawlerProcess
-from scrapy.utils.project import get_project_settings
-
+from scrapers.scraper import scrape_quote
 
 def register(request):
     if request.method == 'POST':
@@ -27,13 +23,14 @@ def register(request):
 
 @login_required
 def add_author(request):
+    tags = Tag.objects.all()
     if request.method == 'POST':
         name = request.POST['name']
         bio = request.POST['bio']
         author = Author(name=name, bio=bio)
         author.save()
         return redirect('author_list')
-    return render(request, 'add_author.html')
+    return render(request, 'add_author.html', {'tags': Tag.objects.all()})
 
 @login_required
 def add_quote(request):
@@ -55,21 +52,13 @@ def add_quote(request):
 @login_required
 def scrape_quotes(request):
     if request.method == 'POST':
-        process = CrawlerProcess(settings=get_project_settings())
-        process.crawl(AuthorsSpider)
-        process.crawl(QuotesSpider)
-        process.start()
-        
+        render(request, 'scrape_quotes.html')
+        scrape_quote()
         return redirect('home')
-    return render(request, 'scrape.html')
 
 def author_list(request):
     authors = Author.objects.all()
-    return render(request, 'author_list.html', {'authors': authors})
-
-def top_tags(request):
-    tags = Tag.objects.annotate(num_quotes=Count('quote')).order_by('-num_quotes')[:10]
-    return render(request, 'top_tags.html', {'tags': tags})
+    return render(request, 'author_list.html', {'authors': authors, 'tags': Tag.objects.all()})
 
 def quotes_by_tag(request, tag_name):
     tag = Tag.objects.get(name=tag_name)
@@ -77,8 +66,14 @@ def quotes_by_tag(request, tag_name):
     return render(request, 'quotes_by_tag.html', {'quotes': quotes, 'tag': tag})
 
 def quote_list(request):
-    quotes = Quote.objects.all()
-    paginator = Paginator(quotes, 10)
+    
+    quotes_list = Quote.objects.all().order_by('author')
+    paginator = Paginator(quotes_list, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'quote_list.html', {'page_obj': page_obj})
+    return render(request, 'quote_list.html', {'page_obj': page_obj, 'tags': Tag.objects.all()})
+
+def author_detail(request, author_id):
+    author = get_object_or_404(Author, pk=author_id)
+    return render(request, 'author_detail.html', {'author': author, 'tags': Tag.objects.all()})
+

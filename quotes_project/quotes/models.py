@@ -11,12 +11,15 @@ class Author(models.Model):
         return self.name
 
 class Quote(models.Model):
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
     text = models.TextField()
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
     tags = models.ManyToManyField('Tag')
 
+    class Meta:
+        unique_together = ('text', 'author')
+
     def __str__(self):
-        return self.text[:50]
+        return self.text
 
 class Tag(models.Model):
     name = models.CharField(max_length=255, unique=True)

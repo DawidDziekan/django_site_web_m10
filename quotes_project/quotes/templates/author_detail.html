@@ -1,0 +1,18 @@
+{% extends 'index.html' %}
+
+{% block content %}
+    <title>{{ author.name }}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="display-4">{{ author.name }}</h1>
+            <p class="lead">{{ author.bio }}</p>
+        </div>
+    </div>
+</body>
+{% endblock %}
